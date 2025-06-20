@@ -1,0 +1,44 @@
+# backend-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  namespace: my-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: <your-ecr-backend-image>  # Update with your ECR image URI
+        ports:
+        - containerPort: 5000
+        env:
+        - name: DB_HOST
+          value: "<your-rds-endpoint>"     # e.g. mydb.abc123.us-east-1.rds.amazonaws.com
+        - name: DB_USER
+          value: "admin"
+        - name: DB_PASSWORD
+          value: "yourpassword"
+        - name: DB_NAME
+          value: "yourdbname"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: my-app
+spec:
+  selector:
+    app: backend
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+  type: ClusterIP
